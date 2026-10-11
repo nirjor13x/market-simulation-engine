@@ -1,5 +1,7 @@
 #include "orderbook.h"
+#include <algorithm>
 #include <iostream>
+#include <limits>
 #include <string>
 using namespace std;
 
@@ -16,8 +18,14 @@ static uint32_t totalQuantity(const deque<Order>& level){
 }
 
 void orderbook::addOrder(Order order){
+    const bool isMarket = (order.type == OrderType::Market);
+
+    if (isMarket){
+        order.price = (order.side == Side::Buy)
+                        ? std::numeric_limits<int64_t>::max()
+                        : std::numeric_limits<int64_t>::min();
+    }
     if (order.side == Side::Buy){
-        // Keep trading while we still want shares and a cheap-enough seller exists
         while (order.quantity > 0 && !asks_.empty()){
             auto best = asks_.begin();
             if (best->first > order.price) break;
@@ -31,12 +39,17 @@ void orderbook::addOrder(Order order){
                 order.quantity -= qty;
                 resting.quantity -= qty;
                 
-                if (resting.quantity == 0) level.pop_front(); // fully filled, remove
+                if (resting.quantity == 0) {
+                    index_.erase(resting.id);
+                    level.pop_front();
+                }
             }
             if (level.empty()) asks_.erase(best); // no orders left at this price
         }
-        // Anything not filled waits in the book
-        if (order.quantity > 0) bids_[order.price].push_back(order);
+        if (!isMarket && order.quantity > 0){
+            bids_[order.price].push_back(order);
+            index_[order.id] = {Side::Buy, order.price};
+        }
     }else{
         // Same logic, mirrored: a seller matches against the highest bids
         while (order.quantity > 0 && !bids_.empty()){
@@ -52,17 +65,48 @@ void orderbook::addOrder(Order order){
                 order.quantity -= qty;
                 resting.quantity -= qty;
 
-                if (resting.quantity == 0) level.pop_front();
+                if (resting.quantity == 0) {
+                    index_.erase(resting.id);
+                    level.pop_front();
+                }
             }
             if (level.empty()) bids_.erase(best);
         }
-        if (order.quantity > 0) asks_[order.price].push_back(order);
+        if (!isMarket && order.quantity > 0){
+            asks_[order.price].push_back(order);
+            index_[order.id] = {Side::Sell, order.price};
+        }
     }
+}
+
+bool orderbook::cancelOrder(uint64_t id){
+    auto found = index_.find(id);
+    if (found == index_.end()) return false;
+
+    Location loc = found -> second;
+
+    auto removeFrom = [&](auto& book){
+        auto levelIt = book.find(loc.price);
+        if(levelIt == book.end()) return;
+        auto& level = levelIt -> second;
+        for(auto it = level.begin(); it != level.end(); ++it){
+            if(it->id == id){
+                level.erase(it);
+                break;
+            }
+        }
+        if(level.empty()) book.erase(levelIt);
+    };
+
+    if(loc.side == Side::Buy) removeFrom(bids_);
+    else removeFrom(asks_);
+
+    index_.erase(found);
+    return true;
 }
 
 void orderbook::print() const {
     cout << "----- ASKS (sells) -----\n";
-    // asks_ is lowest-first, so walk it backwards to show the best ask nearest the middle
     for (auto it = asks_.rbegin(); it != asks_.rend(); ++it){
         cout << formatPrice(it->first) << "  x " << totalQuantity(it->second) << "\n";
     }

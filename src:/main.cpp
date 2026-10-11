@@ -1,3 +1,4 @@
+#include<iostream>
 #include "orderbook.h"
 
 int main(){
@@ -13,11 +14,11 @@ int main(){
     book.addOrder({6, Side::Buy, 9900, 50});
     book.addOrder({7, Side::Buy, 9900, 20});
 
-    // Test 1: a buyer who crosses the book
-    book.addOrder({8, Side::Buy, 10050, 20});
+    std::cout << "cancel #2: " << (book.cancelOrder(2) ? "ok" : "not found") << "\n";
+    book.addOrder({9, Side::Buy, 0, 20, OrderType::Market});
+    book.addOrder({10, Side::Sell, 0, 80, OrderType::Market});
+    std::cout << "cancel #999: " << (book.cancelOrder(999) ? "ok" : "not found") << "\n";
 
-    // Test 2: a big seller who eats the top bids and has shares left over
-    book.addOrder({8, Side::Sell, 9950, 40});
 
 
     book.printTrades();
