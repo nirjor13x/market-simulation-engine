@@ -3,13 +3,23 @@
 #include <functional>
 #include <map>
 #include "order.h"
+#include <optional>
+#include <unordered_map>
+#include <vector>
 
 class orderbook {
     public:
         void addOrder(Order order);
         bool cancelOrder(uint64_t id);
+
+        std::optional<int64_t> bestBid() const;
+        std::optional<int64_t> bestAsk() const;
+        std::optional<int64_t> spread() const;
+        std::optional<double> midPrice() const;
+
         void print() const;
         void printTrades() const;
+        void printSummary() const;
     private:
 
         struct Location {

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <iomanip>
 using namespace std;
 
 static string formatPrice(int64_t cents){
@@ -103,6 +104,46 @@ bool orderbook::cancelOrder(uint64_t id){
 
     index_.erase(found);
     return true;
+}
+std::optional<int64_t> orderbook::bestBid() const{
+    if(bids_.empty()) return std::nullopt;
+    return bids_.begin() -> first;
+}
+
+std::optional<int64_t> orderbook::bestAsk() const{
+    if(asks_.empty()) return std::nullopt;
+    return asks_.begin() -> first;
+}
+
+std::optional<int64_t> orderbook::spread() const{
+    auto bid = bestBid();
+    auto ask = bestAsk();
+    if (!bid || !ask) return std::nullopt;
+    return *ask - *bid;
+}
+
+std::optional<double> orderbook::midPrice() const{
+    auto bid = bestBid();
+    auto ask = bestAsk();
+    if (!bid || !ask) return std::nullopt;
+    return (*bid + *ask) / 2.0;
+}
+
+void orderbook::printSummary() const {
+    auto bid = bestBid();
+    auto ask = bestAsk();
+    auto sp = spread();
+    auto mid = midPrice();
+
+    std::cout << "Best bid: " << (bid ? formatPrice(*bid) : "none") << "\n";
+    std::cout << "Best ask: " << (ask ? formatPrice(*ask) : "none") << "\n";
+    std::cout << "Spread:   " << (sp ? formatPrice(*sp) : "none") << "\n";
+    if (mid){
+        std::cout << "Mid:     $" << std::fixed << std::setprecision(3)
+                  << (*mid/100.0) << "\n";
+    }else{
+        std::cout << "Mid:     none\n";
+    }
 }
 
 void orderbook::print() const {
