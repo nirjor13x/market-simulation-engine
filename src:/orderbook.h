@@ -20,6 +20,10 @@ class orderbook {
         void print() const;
         void printTrades() const;
         void printSummary() const;
+
+        const std::vector<Trade>& trades() const { return trades_; }
+        uint32_t quantityAt(Side side, int64_t price) const;
+        
     private:
 
         struct Location {

@@ -146,6 +146,15 @@ void orderbook::printSummary() const {
     }
 }
 
+uint32_t orderbook::quantityAt(Side side, int64_t price) const {
+    if (side==Side::Buy){
+        auto it = bids_.find(price);
+        return it == bids_.end() ? 0 : totalQuantity(it->second);
+    }
+    auto it = asks_.find(price);
+    return it == asks_.end() ? 0 : totalQuantity(it->second);
+}
+
 void orderbook::print() const {
     cout << "----- ASKS (sells) -----\n";
     for (auto it = asks_.rbegin(); it != asks_.rend(); ++it){
@@ -161,6 +170,6 @@ void orderbook::printTrades() const {
     std::cout << "----- TRADES -----\n";
     for(const Trade& t : trades_){
         std::cout << "buy #" << t.buyId << " x sell #" << t.sellId
-        << " | " << t.quantitiy << " @ " << formatPrice(t.price) << "\n";
+        << " | " << t.quantity << " @ " << formatPrice(t.price) << "\n";
     }
 }

@@ -17,5 +17,5 @@ struct Trade {
     uint64_t buyId;
     uint64_t sellId;
     int64_t price; // always the price of the order that was already resting
-    uint32_t quantitiy;
+    uint32_t quantity;
 };
