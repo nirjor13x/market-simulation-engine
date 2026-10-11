@@ -39,7 +39,11 @@ and liquidity emerge from many small decisions.
 
 ## Build and run
 
-    (add commands here once you have a working build)
+    g++ -std=c++17 -Wall -Wextra src/main.cpp src/orderbook.cpp -o build/engine
+    ./build/engine
+
+    g++ -std=c++17 -Wall -Wextra tests/test_orderbook.cpp src/orderbook.cpp -o build/tests
+    ./build/tests
 
 ## Roadmap
 
