@@ -13,6 +13,14 @@ int main(){
     book.addOrder({6, Side::Buy, 9900, 50});
     book.addOrder({7, Side::Buy, 9900, 20});
 
+    // Test 1: a buyer who crosses the book
+    book.addOrder({8, Side::Buy, 10050, 20});
+
+    // Test 2: a big seller who eats the top bids and has shares left over
+    book.addOrder({8, Side::Sell, 9950, 40});
+
+
+    book.printTrades();
     book.print();
     return 0;
 }
