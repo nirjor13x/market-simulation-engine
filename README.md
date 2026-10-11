@@ -43,10 +43,10 @@ and liquidity emerge from many small decisions.
 
 ## Roadmap
 
-- [ ] Order book and limit order matching
-- [ ] Market orders and cancellations
-- [ ] Trade log and book queries
-- [ ] Test suite
+- [x] Order book and limit order matching
+- [x] Market orders and cancellations
+- [x] Trade log and book queries
+- [x] Test suite
 - [ ] Simulated traders
 - [ ] Python analysis and plots
 
