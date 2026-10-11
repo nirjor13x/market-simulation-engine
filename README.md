@@ -4,6 +4,8 @@ A limit order book and matching engine written in C++, paired with a
 simulator that populates it with automated traders and a Python toolkit
 for analyzing the results.
 
+![Simulation results](analysis/results.png)
+
 ## Overview
 
 This project models how a financial exchange works under the hood. Orders
@@ -12,19 +14,30 @@ and orders at the same price are filled in the order they arrived. The
 engine supports limit orders, market orders, partial fills, and
 cancellations, and records every trade for later analysis.
 
-On top of the engine, simulated traders (random participants and a simple
-market maker) generate order flow, so you can study how prices, spreads,
-and liquidity emerge from many small decisions.
+On top of the engine, simulated traders generate order flow: a random
+trader that places and cancels orders around the current price, and a
+market maker that quotes both sides of the book and manages its
+inventory.
 
 ## Features
 
-- Limit order book with bid/ask price levels
+- Limit order book with bid/ask price levels (prices stored as integer cents)
 - Price-time priority matching with partial fills
 - Market orders and order cancellation
-- Trade log with best bid, best ask, spread, and mid price
-- Simulated traders: random traders and a market maker
-- Python analysis: price history, spread distribution, volume, and
-  market maker profit and inventory
+- Trade log, best bid/ask, spread, and mid price queries
+- Automated test suite covering matching, priority, cancels, and queries
+- Simulation with a random trader and an inventory-aware market maker
+- Python analysis of price, spread, volume, market maker P&L and inventory
+
+## Results
+
+In a 20,000-step run, the market maker earned a steady profit while its
+inventory stayed within about ±40 shares, and the average spread settled
+around 9 cents.
+
+The market maker profits here because the random traders are uninformed.
+Real markets also contain informed traders, who cause adverse selection
+losses for market makers. Modeling that is a natural next step.
 
 ## Tech stack
 
@@ -33,17 +46,27 @@ and liquidity emerge from many small decisions.
 
 ## Project structure
 
-    src/        C++ engine and simulator
+    src/        C++ engine (order book, matching) and simulate.cpp
     tests/      Hand-checked matching scenarios
-    analysis/   Python scripts and plots
+    analysis/   Python plotting script and results chart
 
 ## Build and run
 
-    g++ -std=c++17 -Wall -Wextra src/main.cpp src/orderbook.cpp -o build/engine
-    ./build/engine
+Run all commands from the project root.
+
+Run the tests:
 
     g++ -std=c++17 -Wall -Wextra tests/test_orderbook.cpp src/orderbook.cpp -o build/tests
     ./build/tests
+
+Run the simulation (writes trades.csv and steps.csv):
+
+    g++ -std=c++17 -Wall -Wextra src/simulate.cpp src/orderbook.cpp -o build/sim
+    ./build/sim
+
+Plot the results (needs pandas and matplotlib):
+
+    python3 analysis/plot_results.py
 
 ## Roadmap
 
@@ -51,10 +74,7 @@ and liquidity emerge from many small decisions.
 - [x] Market orders and cancellations
 - [x] Trade log and book queries
 - [x] Test suite
-- [ ] Simulated traders
-- [ ] Python analysis and plots
-
-## What I'm learning
-
-Data structures for fast order lookup, deterministic testing of matching
-logic, and how market microstructure shapes price behavior.
+- [x] Simulated traders
+- [x] Python analysis and plots
+- [ ] Informed trader to model adverse selection
+- [ ] Sweep market maker spread width vs. profit and risk
