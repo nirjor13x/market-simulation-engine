@@ -68,13 +68,3 @@ Plot the results (needs pandas and matplotlib):
 
     python3 analysis/plot_results.py
 
-## Roadmap
-
-- [x] Order book and limit order matching
-- [x] Market orders and cancellations
-- [x] Trade log and book queries
-- [x] Test suite
-- [x] Simulated traders
-- [x] Python analysis and plots
-- [ ] Informed trader to model adverse selection
-- [ ] Sweep market maker spread width vs. profit and risk
